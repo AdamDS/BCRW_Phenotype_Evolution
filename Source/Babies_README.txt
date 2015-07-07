@@ -1,5 +1,0 @@
-Babies_README.txt
-
-The functions for this model are broken up into four primary folders with some sub folders within the simulation folder. I find it easiest to download & unzip the folders into a convenient location for yourself (possibly the Matlab folder), then within Matlab add with subfolders the "simulation", "analysis", "helper", and "data_modification" folders to the Matlab path. In Matlab, the only scripts you need are main_babies.m (for simulation, clustering, and genealogical data creation) and main_analysis.m (for figure creation, data writing to .csv, and measures of the data). The usefulness of main_modify_data.m is for renaming large data sets, but is of a secondary or tertiary level of importance. I tried to make sure that main_babies.m is well commented for easier first time use, but if you have questions please feel free to ask me at amviot@gmail.com. Although the core of the program is of Dr. Nate Dee's and Dr. Sonya Bahar's design, I have been the primary designer of the enhancements including optimization and automation. Dawn M King will be the next primary designer of future updates by the end of 2013.
-Enjoy!
--Adam D Scott
