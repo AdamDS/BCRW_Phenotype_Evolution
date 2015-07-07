@@ -1,0 +1,20 @@
+errorbar AVG_POPS v mu			1
+STD_POPS v mu				2
+AVG_GEN_POPS v gen			3
+errorbar AVG_DENS v mu			4
+STD_DENS v mu				5
+errorbar AVG_END v mu			6
+STD_END v mu				7
+errorbar AVG_END_DENS v mu		8
+STD_END_DENS v mu			9
+errorbar land_pops v xl			10
+land_std_pops v xl			11
+errorbar land_dens v xl			12
+land_std_dens v xl			13
+errorbar land_end v xl			14
+land_std_end v xl			15
+errorbar land_end_dens v xl		16
+land_std_end_dens v xl			17
+
+errorbar AVG_NCS v mu			18
+STD_NCS v mu				19

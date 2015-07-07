@@ -1,0 +1,93 @@
+%% get_gyration_radii.m
+%
+% Builds the data vector, cluster_diameters, for a set of data. The
+% vector is organized like a centroids data vector, in that the order of
+% the elements are blocked off by generation and by cluster identity order.
+% -ADS 10*4*12
+% function [gyration_radii] = build_gyration_radii(base_name,run_name), 
+
+this_script = 'get_gyration_radii';
+fprintf([this_script '\n']);
+global SIMOPTS;
+limit = SIMOPTS.limit;
+gyration_radii = [];
+tic;
+for op = overpop, SIMOPTS.op = op;
+for dm = death_max, SIMOPTS.dm = dm;
+for mu = mutability, SIMOPTS.mu = mu;
+  make_dir = 0; [base_name,dir_name] = NameAndCD(make_dir);
+  r = 0;
+  for run = SIMS, 
+    r = r +1;
+    run_name = int2str(run);
+    fprintf(['Attempting ' this_script ' for ' base_name run_name '\n']);
+    if ~mat_exist(['gyration_radii_' base_name run_name]) || SIMOPTS.write_over, 
+    [p,go,error] = try_catch_load(['population_' base_name run_name],1,1);
+    if go, [tc,go,error] = try_catch_load(['trace_cluster_' base_name run_name],go,1);
+    if go, [nc,go,error] = try_catch_load(['num_clusters_' base_name run_name],go,1);
+    if go, [tx,go,error] = try_catch_load(['trace_x_' base_name run_name],go,1);
+    if go, [ty,go,error] = try_catch_load(['trace_y_' base_name run_name],go,1);
+    if go, [cx,go,error] = try_catch_load(['centroid_x_' base_name run_name],go,1);
+    if go, [cy,go,error] = try_catch_load(['centroid_y_' base_name run_name],go,1);
+    if go, [org,go,error] = try_catch_load(['orgsnclusters_' base_name run_name],go,1);
+    if go,  
+      fprintf([base_name run_name '\n']);
+      trace_cluster = tc.trace_cluster;  clear tc
+      num_clusters = nc.num_clusters;  clear nc
+      trace_x = tx.trace_x; clear tx
+      trace_y = ty.trace_y; clear ty
+      population = p.population;  clear pop
+      centroid_x = cx.centroid_x; clear cx
+      centroid_y = cy.centroid_y; clear cy
+      orgsnclusters = org.orgsnclusters;  clear org
+
+      %initialize characteristic length holders
+      gyration_radii = zeros(sum(num_clusters),1); %indexed by j
+      ngen = length(population(population>=limit));
+      for gen = 1:ngen, 
+%         script_gen_update(this_script,gen,base_name,run_name);
+        v = sum(population(1:gen)); u = v -population(gen) +1;
+        cv = sum(num_clusters(1:gen));  cu = cv -num_clusters(gen) +1;
+        %get the cluster assignments of organisms in this generation
+        tc_of_gen = trace_cluster(u:v);
+        %get the centroids of each cluster
+        cents_of_gen = [centroid_x(cu:cv) centroid_y(cu:cv)];
+        %get the coordinates of organisms in this generation
+        coords_of_gen = [trace_x(u:v) trace_y(u:v)];
+        orgs_of_gen = orgsnclusters(cu:cv);
+        radii = zeros(num_clusters(gen),1);
+        %for each cluster
+        for cluster = 1:num_clusters(gen),  
+          %get organisms of the same cluster
+          these_orgs = find(tc_of_gen==cluster);
+          N = length(these_orgs);
+          %get x & y coords of only those in the same cluster
+          these_coords = coords_of_gen(these_orgs,:);
+          these_cents = ones(size(these_coords,1),1)*cents_of_gen(cluster,:);
+          orgs = orgs_of_gen(cluster);
+          %gyration radius for distances between center of cluster mass and
+          %each organism (Lesne p15 assuming integral A(xbar) = orgs)
+          radii(cluster) = sqrt(mean((sum((these_coords-these_cents).^2,2))./orgs));
+    %% start of debugging
+    %%
+
+        end
+        gyration_radii(cu:cv) = radii;
+      end
+      save(['gyration_radii_' base_name run_name],'gyration_radii');
+    %% 
+    %% last part of debugging
+    end %orgsnclusters
+    end %centroid_y
+    end %centroid_x
+    end %trace_y
+    end %trace_x
+    end %num_clusters
+    end %trace_cluster
+    end %population
+
+    end %exists
+  end
+end
+end
+end

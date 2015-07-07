@@ -1,0 +1,42 @@
+%% make_cluster_size_distribution.m
+%
+%
+global SIMOPTS;
+this_script = 'cluster_size_distribution';
+limit = SIMOPTS.limit;
+for op = overpop, SIMOPTS.op = op;
+for dm = death_max, SIMOPTS.dm = dm;
+for mu = mutability, SIMOPTS.mu = mu;
+  [base_name,~] = NameAndCD(0,do_cd);
+  NS = [];
+  for run = SIMS, 
+    run_name = int2str(run);
+    
+    fprintf(['Attempting ' this_script ' for ' base_name run_name '\n']);
+    if ~mat_exist(['cluster_size_distribution_' base_name run_name]) || SIMOPTS.write_over,  
+    [nc,go] = try_catch_load(['num_clusters_' base_name run_name],1,1); 
+    if go,  [onc,go] = try_catch_load(['orgsnclusters_' base_name run_name],go,1);
+    if go,
+    num_clusters = nc.num_clusters; clear nc, 
+    orgsnclusters = onc.orgsnclusters;  clear onc,  
+    
+    %initialize correlation length holder
+    monc = max(orgsnclusters);
+    csd = zeros(monc,1);
+    ngen = length(num_clusters);
+    for gen = 1:ngen, 
+      script_gen_update(this_script,gen,base_name,run_name);
+      [cu,cv] = gen_index(num_clusters,gen);
+      onc = orgsnclusters(cu:cv);
+      [ns,s] = hist(onc,monc);
+      NS = cat_row(NS,ns);
+    end %for gen
+    end %orgsnclusters
+    end %num_clusters
+    end %exists correlation_lengths
+  end %run
+  cluster_number_distribution = mean(NS)./sum(mean(NS));
+  save(['cluster_number_distribution_' base_name(1:end-1)],'cluster_number_distribution');
+end %mu
+end %dm
+end %op      
